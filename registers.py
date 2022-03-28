@@ -33,7 +33,7 @@ class REGISTERS(Elaboratable):
         m.d.comb += self.data1_rd.eq(Mux(self.reg1_rd==0, 0, self.mem[self.reg1_rd]))
         m.d.comb += self.data2_rd.eq(Mux(self.reg2_rd==0, 0, self.mem[self.reg2_rd]))
         with m.If(self.reset):
-            for i in range(31):
+            for i in range(32):
                 m.d.neg += self.mem[i].eq(0)
         with m.If(self.wr):
             m.d.neg += self.mem[self.reg_wr].eq(self.data_wr)
@@ -47,21 +47,21 @@ def proc():
 
     yield dut.wr.eq(1)
     yield Delay(2e-8)
-    for i in range(31):
+    for i in range(32):
         yield Delay(2e-8)
         yield dut.reg_wr.eq(i)
         yield dut.data_wr.eq(i)
         yield Delay(2e-8)
     yield Delay(2e-8)
     yield dut.wr.eq(0)
-    for i in range(31):
-        yield dut.reg1_rd.eq(31-i)
+    for i in range(32):
+        yield dut.reg1_rd.eq(32-i)
         yield dut.reg2_rd.eq(i)
         yield Delay(2e-8)
     yield dut.reset.eq(1)
-    for i in range(31):
-        dut.reg1_rd.eq(31-i)
-        dut.reg2_rd.eq(i)
+    for i in range(32):
+        yield dut.reg1_rd.eq(32-i)
+        yield dut.reg2_rd.eq(i)
         yield Delay(2e-8)
 
     
