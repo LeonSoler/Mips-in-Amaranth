@@ -18,7 +18,7 @@ class PROCESSOR(Elaboratable):
         self.I_WrStb = Signal()
         self.I_DataOut = Signal(32)
         self.I_DataIn = Signal(32)
-        self.I_mem = Array([Signal(32) for _ in range(1024)])
+        self.I_mem = Array([Signal(32) for _ in range(132)])
     
         #Data Memory
         self.D_Addr = Signal(32)
@@ -26,7 +26,7 @@ class PROCESSOR(Elaboratable):
         self.D_Wrstb = Signal()
         self.D_DataOut = Signal(32)
         self.D_DataIn = Signal(32)
-        self.D_mem = Array([Signal(32) for _ in range(1024)])
+        self.D_mem = Array([Signal(32) for _ in range(132)])
         
     
 
@@ -282,7 +282,7 @@ class PROCESSOR(Elaboratable):
         # Comienzo etapa EX
 
 
-        with m.If(EX_Ctrl_ALUSrc):
+        with m.If(EX_Ctrl_ALUSrc==1):
             m.d.comb += ALU_in.eq(EX_immediate)
         with m.Else():
             m.d.comb += ALU_in.eq(EX_RegB)
@@ -325,26 +325,26 @@ class PROCESSOR(Elaboratable):
         # Registro de segmentacion EX-MEM
         
         with m.If(self.Reset):
-            m.d.comb += MEM_PC_Branch.eq(0)
-            m.d.comb += MEM_RegDst.eq(0)
-            m.d.comb += MEM_Ctrl_Memto_Reg.eq(0) 
-            m.d.comb += MEM_Ctrl_Reg_Write.eq(0)
+            m.d.pos += MEM_PC_Branch.eq(0)
+            m.d.pos += MEM_RegDst.eq(0)
+            m.d.pos += MEM_Ctrl_Memto_Reg.eq(0) 
+            m.d.pos += MEM_Ctrl_Reg_Write.eq(0)
             m.d.comb += MEM_Ctrl_Mem_Read.eq(0)
-            m.d.comb += MEM_Ctrl_Mem_Write.eq(0)
-            m.d.comb += MEM_Ctrl_Branch.eq(0)
-            m.d.comb += MEM_RegB.eq(0)
-            m.d.comb += MEM_ALU_Result.eq(0)
+            m.d.pos += MEM_Ctrl_Mem_Write.eq(0)
+            m.d.pos += MEM_Ctrl_Branch.eq(0)
+            m.d.pos += MEM_RegB.eq(0)
+            m.d.pos += MEM_ALU_Result.eq(0)
         with m.Else():
-            m.d.comb += MEM_RegDst.eq(EX_MuxReg)
-            m.d.comb += MEM_PC_Branch.eq(AddResultI)
-            m.d.comb += MEM_Ctrl_Memto_Reg.eq(EX_Ctrl_Memto_Reg) 
-            m.d.comb += MEM_Ctrl_Reg_Write.eq(EX_Ctrl_Reg_Write)
+            m.d.pos += MEM_RegDst.eq(EX_MuxReg)
+            m.d.pos += MEM_PC_Branch.eq(AddResultI)
+            m.d.pos += MEM_Ctrl_Memto_Reg.eq(EX_Ctrl_Memto_Reg) 
+            m.d.pos += MEM_Ctrl_Reg_Write.eq(EX_Ctrl_Reg_Write)
             m.d.comb += MEM_Ctrl_Mem_Read.eq(EX_Ctrl_Mem_Read)
-            m.d.comb += MEM_Ctrl_Mem_Write.eq(EX_Ctrl_Mem_Write)
-            m.d.comb += MEM_Ctrl_Branch.eq(EX_Ctrl_Branch)
-            m.d.comb += MEM_RegB.eq(EX_RegB)
-            m.d.comb += MEM_ALU_Zero.eq(ALU_zero)
-            m.d.comb += MEM_ALU_Result.eq(ALU_result)
+            m.d.pos += MEM_Ctrl_Mem_Write.eq(EX_Ctrl_Mem_Write)
+            m.d.pos += MEM_Ctrl_Branch.eq(EX_Ctrl_Branch)
+            m.d.pos += MEM_RegB.eq(EX_RegB)
+            m.d.pos += MEM_ALU_Zero.eq(ALU_zero)
+            m.d.pos += MEM_ALU_Result.eq(ALU_result)
         
         # Inicio etapa MEM
 
