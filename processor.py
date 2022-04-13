@@ -255,7 +255,7 @@ class PROCESSOR(Elaboratable):
             m.d.pos += EX_RegD_TR.eq(0)
             m.d.pos += EX_PC_4.eq(0)
             m.d.pos += EX_immediate.eq(0)  
-            m.d.pos += EX_Ctrl_RegDst.eq(0)
+            m.d.comb += EX_Ctrl_RegDst.eq(0)
             m.d.pos += EX_Ctrl_ALUSrc.eq(0)
             m.d.pos += EX_Ctrl_Memto_Reg.eq(0)
             m.d.pos += EX_Ctrl_Reg_Write.eq(0)
@@ -270,7 +270,7 @@ class PROCESSOR(Elaboratable):
             m.d.pos += EX_RegD_TR.eq(ID_instruction[11:16])
             m.d.pos += EX_PC_4.eq(ID_PC_4)
             m.d.pos += EX_immediate.eq(ID_sign_ext)
-            m.d.pos += EX_Ctrl_RegDst.eq(ID_RegDst)
+            m.d.comb += EX_Ctrl_RegDst.eq(ID_RegDst)
             m.d.pos += EX_Ctrl_ALUSrc.eq(ID_ALUSrc)
             m.d.pos += EX_Ctrl_Memto_Reg.eq(ID_Memto_Reg)
             m.d.pos += EX_Ctrl_Reg_Write.eq(ID_Reg_Write)
@@ -330,9 +330,9 @@ class PROCESSOR(Elaboratable):
             m.d.pos += MEM_Ctrl_Memto_Reg.eq(0) 
             m.d.pos += MEM_Ctrl_Reg_Write.eq(0)
             m.d.comb += MEM_Ctrl_Mem_Read.eq(0)
-            m.d.pos += MEM_Ctrl_Mem_Write.eq(0)
+            m.d.comb += MEM_Ctrl_Mem_Write.eq(0)
             m.d.pos += MEM_Ctrl_Branch.eq(0)
-            m.d.pos += MEM_RegB.eq(0)
+            m.d.comb += MEM_RegB.eq(0)
             m.d.pos += MEM_ALU_Result.eq(0)
         with m.Else():
             m.d.pos += MEM_RegDst.eq(EX_MuxReg)
@@ -340,9 +340,9 @@ class PROCESSOR(Elaboratable):
             m.d.pos += MEM_Ctrl_Memto_Reg.eq(EX_Ctrl_Memto_Reg) 
             m.d.pos += MEM_Ctrl_Reg_Write.eq(EX_Ctrl_Reg_Write)
             m.d.comb += MEM_Ctrl_Mem_Read.eq(EX_Ctrl_Mem_Read)
-            m.d.pos += MEM_Ctrl_Mem_Write.eq(EX_Ctrl_Mem_Write)
+            m.d.comb += MEM_Ctrl_Mem_Write.eq(EX_Ctrl_Mem_Write)
             m.d.pos += MEM_Ctrl_Branch.eq(EX_Ctrl_Branch)
-            m.d.pos += MEM_RegB.eq(EX_RegB)
+            m.d.comb += MEM_RegB.eq(EX_RegB)
             m.d.pos += MEM_ALU_Zero.eq(ALU_zero)
             m.d.pos += MEM_ALU_Result.eq(ALU_result)
         
@@ -351,7 +351,7 @@ class PROCESSOR(Elaboratable):
         m.d.comb += self.D_Addr.eq(MEM_ALU_Result)
         m.d.comb += self.D_RdStb.eq(MEM_Ctrl_Mem_Read)
         m.d.comb += self.D_Wrstb.eq(MEM_Ctrl_Mem_Write)
-        m.d.comb += self.D_DataOut.eq(MEM_RegB)
+        m.d.pos += self.D_DataOut.eq(MEM_RegB)
         m.d.comb += D_DataALUIn.eq(self.D_DataIn)
         inst_data_memory = MEMORY(self.D_Addr,self.D_DataOut,self.D_RdStb,self.D_Wrstb,self.D_DataIn,self.D_mem)
 
@@ -364,13 +364,13 @@ class PROCESSOR(Elaboratable):
         
         # Registro de segmentacion MEM/WB
         with m.If(self.Reset):
-            m.d.pos += WB_Ctrl_Memto_Reg.eq(0)
+            m.d.comb += WB_Ctrl_Memto_Reg.eq(0)
             m.d.pos += WB_RegDst.eq(0)
             m.d.pos += WB_Reg_Write.eq(0)
             m.d.pos += WB_ALU_Result.eq(0)
             m.d.pos += WB_Read_Data.eq(0)
         with m.Else():
-            m.d.pos += WB_Ctrl_Memto_Reg.eq(MEM_Ctrl_Memto_Reg)
+            m.d.comb += WB_Ctrl_Memto_Reg.eq(MEM_Ctrl_Memto_Reg)
             m.d.pos += WB_RegDst.eq(MEM_RegDst)
             m.d.pos += WB_Reg_Write.eq(MEM_Ctrl_Reg_Write)
             m.d.pos += WB_ALU_Result.eq(MEM_ALU_Result)
@@ -392,6 +392,7 @@ class PROCESSOR(Elaboratable):
 def proc():
     
     address1 = Signal(32)
+    yield dut.Reset.eq(1)
     with open("program1") as file:
         for line in file:
             yield dut.I_mem[address1].eq(int(line.rstrip(),16))
@@ -403,7 +404,8 @@ def proc():
             yield dut.D_mem[address2].eq(int(line.rstrip(),16))
             yield address2.eq(address2+4)
             yield Settle()
-    yield dut.Reset.eq(1)
+    yield Delay(5e-8)
+    
     yield Delay(1.2e-7)
     yield dut.Reset.eq(0)
     yield Delay(1.8e-6)
